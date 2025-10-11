@@ -43,12 +43,12 @@ export const AgentForm = ({
     trpc.agents.create.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.agents.getMany.queryOptions({}),
+          trpc.agents.getMany.queryOptions({})
         );
 
-         if (initialValues?.id) {
+        if (initialValues?.id) {
           await queryClient.invalidateQueries(
-            trpc.agents.getOne.queryOptions({ id: initialValues.id }),
+            trpc.agents.getOne.queryOptions({ id: initialValues.id })
           );
         }
         // await queryClient.invalidateQueries(
@@ -63,11 +63,31 @@ export const AgentForm = ({
         if (error.data?.code === "FORBIDDEN") {
           router.push("/upgrade");
         }
-      },      
+      },
     })
   );
 
-    const form = useForm<z.infer<typeof agentsInsertSchema>>({
+  const updateAgent = useMutation(
+    trpc.agents.update.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.agents.getMany.queryOptions({})
+        );
+
+        if (initialValues?.id) {
+          await queryClient.invalidateQueries(
+            trpc.agents.getOne.queryOptions({ id: initialValues.id })
+          );
+        }
+        onSuccess?.();
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    })
+  );
+
+  const form = useForm<z.infer<typeof agentsInsertSchema>>({
     resolver: zodResolver(agentsInsertSchema),
     defaultValues: {
       name: initialValues?.name ?? "",
@@ -75,21 +95,18 @@ export const AgentForm = ({
     },
   });
 
-    const isEdit = !!initialValues?.id;
-  const isPending = createAgent.isPending
+  const isEdit = !!initialValues?.id;
+  const isPending = createAgent.isPending || updateAgent.isPending;
 
-
-    const onSubmit = (values: z.infer<typeof agentsInsertSchema>) => {
+  const onSubmit = (values: z.infer<typeof agentsInsertSchema>) => {
     if (isEdit) {
-    //   updateAgent.mutate({ ...values, id: initialValues.id });
-    console.log("TODO: updateAgent");
-    
+      updateAgent.mutate({ ...values, id: initialValues.id });
     } else {
       createAgent.mutate(values);
     }
   };
 
-    return (
+  return (
     <Form {...form}>
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         <GeneratedAvatar
@@ -143,7 +160,7 @@ export const AgentForm = ({
         </div>
       </form>
     </Form>
- );
+  );
 };
 
 //    const createAgent = useMutation(
@@ -204,6 +221,5 @@ export const AgentForm = ({
 //       createAgent.mutate(values);
 //     }
 //   };
-
 
 // };
