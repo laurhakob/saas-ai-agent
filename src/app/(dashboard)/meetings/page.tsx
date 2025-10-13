@@ -1,6 +1,6 @@
 // import { Suspense } from "react";
-// import { headers } from "next/headers";
-// import { redirect } from "next/navigation";
+ import { headers } from "next/headers";
+ import { redirect } from "next/navigation";
 // import type { SearchParams } from "nuqs/server";
 // import { ErrorBoundary } from "react-error-boundary";
 // import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
@@ -15,11 +15,11 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-// import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 // import { getQueryClient, trpc } from "@/trpc/server";
 
 // import { loadSearchParams } from "@/modules/meetings/params";
-// import { MeetingsListHeader } from "@/modules/meetings/ui/components/meetings-list-header";
+ import { MeetingsListHeader } from "@/modules/meetings/ui/components/meetings-list-header";
 // import {
 //   MeetingsView,
 //   MeetingsViewError,
@@ -64,11 +64,24 @@ import { ErrorBoundary } from "react-error-boundary";
 
 // export default Page;
 
-const Page = () => {
+const Page = async () => {
+  
+    const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/sign-in");
+  }
+
+
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(trpc.meetings.getMany.queryOptions({}));
 
   return (
+
+     <>
+     <MeetingsListHeader />
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Suspense fallback={<MeetingsViewLoading />}>
         <ErrorBoundary fallback={<MeetingsViewError />}>
@@ -76,6 +89,7 @@ const Page = () => {
         </ErrorBoundary>
       </Suspense>
     </HydrationBoundary>
+      </>
   );
 };
 
