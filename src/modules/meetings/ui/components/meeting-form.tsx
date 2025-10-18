@@ -1,16 +1,15 @@
- import { z } from "zod";
- import { toast } from "sonner";
- import { useState } from "react";
- import { useForm } from "react-hook-form";
- import { zodResolver } from "@hookform/resolvers/zod";
- import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
+import { toast } from "sonner";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { MeetingGetOne } from "../../types";
-
- import { useTRPC } from "@/trpc/client";
+import { useTRPC } from "@/trpc/client";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { CommandSelect } from "@/components/command-select";
 import { GeneratedAvatar } from "@/components/generated-avatar";
 import {
   Form,
@@ -22,11 +21,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { MeetingGetOne } from "../../types";
 import { meetingsInsertSchema } from "../../schemas";
 
- import { NewAgentDialog } from "@/modules/agents/ui/components/new-agent-dialog";
- import { useRouter } from "next/navigation";
-import { CommandSelect } from "@/components/command-select";
+import { NewAgentDialog } from "@/modules/agents/ui/components/new-agent-dialog";
+import { useRouter } from "next/navigation";
 
 interface MeetingFormProps {
   onSuccess?: (id?: string) => void;
@@ -59,9 +58,9 @@ export const MeetingForm = ({
         await queryClient.invalidateQueries(
           trpc.meetings.getMany.queryOptions({}),
         );
-        // await queryClient.invalidateQueries(
-        //   trpc.premium.getFreeUsage.queryOptions(),
-        // );
+        await queryClient.invalidateQueries(
+          trpc.premium.getFreeUsage.queryOptions(),
+        );
 
         onSuccess?.(data.id);
       },
@@ -112,7 +111,7 @@ export const MeetingForm = ({
     } else {
       createMeeting.mutate(values);
     }
-   };
+  };
 
   return (
     <>
@@ -193,4 +192,4 @@ export const MeetingForm = ({
       </Form>
     </>
   );
- };
+};

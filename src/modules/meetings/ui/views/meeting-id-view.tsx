@@ -9,9 +9,9 @@ import {
 } from "@tanstack/react-query";
 
 import { useTRPC } from "@/trpc/client";
-import { LoadingState } from "@/components/loading-state";
-import { ErrorState } from "@/components/error-state";
 import { useConfirm } from "@/hooks/use-confirm";
+import { ErrorState } from "@/components/error-state";
+import { LoadingState } from "@/components/loading-state";
 
 import { ActiveState } from "../components/active-state";
 import { UpcomingState } from "../components/upcoming-state";
@@ -47,9 +47,9 @@ export const MeetingIdView = ({ meetingId }: Props) => {
         await queryClient.invalidateQueries(
           trpc.meetings.getMany.queryOptions({})
         );
-        //   await queryClient.invalidateQueries(
-        //     trpc.premium.getFreeUsage.queryOptions(),
-        //   );
+        await queryClient.invalidateQueries(
+          trpc.premium.getFreeUsage.queryOptions()
+        );
         router.push("/meetings");
       },
     })
@@ -87,7 +87,6 @@ export const MeetingIdView = ({ meetingId }: Props) => {
         {isCancelled && <CancelledState />}
         {isProcessing && <ProcessingState />}
         {isCompleted && <CompletedState data={data} />}
-
         {isActive && <ActiveState meetingId={meetingId} />}
         {isUpcoming && <UpcomingState meetingId={meetingId} />}
       </div>

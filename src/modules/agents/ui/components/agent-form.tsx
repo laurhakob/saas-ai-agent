@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { AgentGetOne } from "../../types";
-
 import { useTRPC } from "@/trpc/client";
 
 import { Input } from "@/components/ui/input";
@@ -21,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { AgentGetOne } from "../../types";
 import { agentsInsertSchema } from "../../schemas";
 import { useRouter } from "next/navigation";
 
@@ -28,7 +27,7 @@ interface AgentFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   initialValues?: AgentGetOne;
-}
+};
 
 export const AgentForm = ({
   onSuccess,
@@ -43,17 +42,11 @@ export const AgentForm = ({
     trpc.agents.create.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.agents.getMany.queryOptions({})
+          trpc.agents.getMany.queryOptions({}),
         );
-
-        if (initialValues?.id) {
-          await queryClient.invalidateQueries(
-            trpc.agents.getOne.queryOptions({ id: initialValues.id })
-          );
-        }
-        // await queryClient.invalidateQueries(
-        //   trpc.premium.getFreeUsage.queryOptions(),
-        // );
+        await queryClient.invalidateQueries(
+          trpc.premium.getFreeUsage.queryOptions(),
+        );
 
         onSuccess?.();
       },
@@ -64,19 +57,19 @@ export const AgentForm = ({
           router.push("/upgrade");
         }
       },
-    })
+    }),
   );
 
   const updateAgent = useMutation(
     trpc.agents.update.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.agents.getMany.queryOptions({})
+          trpc.agents.getMany.queryOptions({}),
         );
 
         if (initialValues?.id) {
           await queryClient.invalidateQueries(
-            trpc.agents.getOne.queryOptions({ id: initialValues.id })
+            trpc.agents.getOne.queryOptions({ id: initialValues.id }),
           );
         }
         onSuccess?.();
@@ -84,7 +77,7 @@ export const AgentForm = ({
       onError: (error) => {
         toast.error(error.message);
       },
-    })
+    }),
   );
 
   const form = useForm<z.infer<typeof agentsInsertSchema>>({
@@ -162,64 +155,3 @@ export const AgentForm = ({
     </Form>
   );
 };
-
-//    const createAgent = useMutation(
-//    trpc.agents.create.mutationOptions({
-//       onSuccess: async () => {
-//         await queryClient.invalidateQueries(
-//           trpc.agents.getMany.queryOptions({}),
-//         );
-//         await queryClient.invalidateQueries(
-//           trpc.premium.getFreeUsage.queryOptions(),
-//         );
-
-//         onSuccess?.();
-//       },
-//       onError: (error) => {
-//         toast.error(error.message);
-
-//         if (error.data?.code === "FORBIDDEN") {
-//           router.push("/upgrade");
-//         }
-//       },
-
-//   const updateAgent = useMutation(
-//     trpc.agents.update.mutationOptions({
-//       onSuccess: async () => {
-//         await queryClient.invalidateQueries(
-//           trpc.agents.getMany.queryOptions({}),
-//         );
-
-//         if (initialValues?.id) {
-//           await queryClient.invalidateQueries(
-//             trpc.agents.getOne.queryOptions({ id: initialValues.id }),
-//           );
-//         }
-//         onSuccess?.();
-//       },
-//       onError: (error) => {
-//         toast.error(error.message);
-//       },
-//     }),
-//   );
-
-//   const form = useForm<z.infer<typeof agentsInsertSchema>>({
-//     resolver: zodResolver(agentsInsertSchema),
-//     defaultValues: {
-//       name: initialValues?.name ?? "",
-//       instructions: initialValues?.instructions ?? "",
-//     },
-//   });
-
-//   const isEdit = !!initialValues?.id;
-//   const isPending = createAgent.isPending || updateAgent.isPending;
-
-//   const onSubmit = (values: z.infer<typeof agentsInsertSchema>) => {
-//     if (isEdit) {
-//       updateAgent.mutate({ ...values, id: initialValues.id });
-//     } else {
-//       createAgent.mutate(values);
-//     }
-//   };
-
-// };
